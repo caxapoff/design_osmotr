@@ -27,7 +27,8 @@ const EMPTY = {
   participants: [],
   sessions:     {},
   history:      [],
-  bonuses:      {}
+  bonuses:      {},
+  wheelSlots:   []
 };
 
 function readData() {
@@ -52,11 +53,11 @@ app.get('/api/data', (_req, res) => {
 
 // Сохранить все данные целиком
 app.post('/api/data', (req, res) => {
-  const { participants, sessions, history, bonuses } = req.body;
+  const { participants, sessions, history, bonuses, wheelSlots } = req.body;
   if (!Array.isArray(participants)) {
     return res.status(400).json({ error: 'Invalid payload' });
   }
-  writeData({ participants, sessions: sessions || {}, history: history || [], bonuses: bonuses || {} });
+  writeData({ participants, sessions: sessions || {}, history: history || [], bonuses: bonuses || {}, wheelSlots: wheelSlots || [] });
   res.json({ ok: true });
 });
 

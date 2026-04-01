@@ -50,11 +50,12 @@ input{font:inherit;color:inherit}
 
 /* APP SHELL */
 .app{display:grid;grid-template-rows:auto 1fr;height:100dvh;overflow:hidden}
-.header{display:flex;align-items:center;justify-content:space-between;padding:var(--sp3) var(--sp6);background:var(--color-surface);border-bottom:1px solid var(--color-divider);gap:var(--sp4);z-index:50}
-.header-left{display:flex;align-items:center;gap:var(--sp3)}
-.logo{display:flex;align-items:center;gap:var(--sp2);color:var(--color-text);text-decoration:none}
-.logo-text{font-size:var(--tx-sm);font-weight:700;letter-spacing:-.01em}
+.header{display:flex;align-items:center;justify-content:space-between;padding:var(--sp2) var(--sp4);background:var(--color-surface);border-bottom:1px solid var(--color-divider);gap:var(--sp4);z-index:50;min-height:48px}
+.header-left{display:flex;align-items:center;gap:var(--sp1);background:var(--color-surface-offset);border-radius:var(--radius-lg);padding:var(--sp1)}
 .header-right{display:flex;align-items:center;gap:var(--sp2)}
+.app-tab{padding:var(--sp2) var(--sp4);border-radius:var(--radius-md);font-size:var(--tx-xs);font-weight:500;color:var(--color-text-muted);cursor:pointer;border:1px solid transparent;background:transparent;transition:background var(--tr),color var(--tr),border-color var(--tr),box-shadow var(--tr);white-space:nowrap}
+.app-tab.active{background:var(--color-primary-hl);color:var(--color-primary);border-color:var(--color-primary);box-shadow:0 0 0 1px var(--color-primary)}
+.app-tab:hover:not(.active){color:var(--color-text);background:color-mix(in oklab,var(--color-surface-2) 50%,transparent)}
 .main{overflow-y:auto;overscroll-behavior:contain;padding:var(--sp6)}
 .content{max-width:900px;margin:0 auto}
 
@@ -229,6 +230,37 @@ input{font:inherit;color:inherit}
   .podium{flex-direction:column}
   .lb-row{grid-template-columns:28px 1fr auto}
 }
+
+/* ══════════════════════════════════════════════
+   WHEEL SPINNER
+══════════════════════════════════════════════ */
+.wheel-page{display:flex;flex-direction:column;align-items:center;gap:var(--sp5);padding-top:var(--sp3)}
+.wheel-top{display:flex;align-items:center;gap:0}
+.wheel-canvas-wrap{border-radius:50%;cursor:pointer;flex-shrink:0;transition:transform .14s;filter:drop-shadow(0 6px 28px oklch(.15 .02 200/.3))}
+.wheel-canvas-wrap:hover:not(.spinning){transform:scale(1.008)}
+.wheel-canvas-wrap:active:not(.spinning){transform:scale(.984)}
+.wheel-canvas-wrap.spinning{cursor:not-allowed}
+.wheel-pointer{display:flex;align-items:center;padding:0 var(--sp2);color:var(--color-primary);flex-shrink:0}
+.wheel-bottom{width:100%;max-width:680px;display:flex;flex-direction:column;gap:var(--sp3)}
+.wheel-bottom-hd{display:flex;align-items:center;justify-content:space-between}
+.wheel-btns{display:flex;gap:var(--sp2)}
+.wheel-slots-row{display:flex;gap:var(--sp3);flex-wrap:wrap}
+.wslot{position:relative;display:flex;flex-direction:column;align-items:center;gap:var(--sp1);padding:var(--sp2);background:var(--color-surface);border:1.5px solid var(--color-border);border-radius:var(--radius-lg);transition:opacity var(--tr),border-color var(--tr);width:96px}
+.wslot:hover{border-color:var(--color-primary)}
+.wslot.used{opacity:.3}
+.wslot-thumb{width:68px;height:68px;border-radius:var(--radius-md);background:var(--color-surface-offset);border:1.5px dashed var(--color-border);overflow:hidden;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color var(--tr),background var(--tr);flex-shrink:0}
+.wslot-thumb:hover{border-color:var(--color-primary);background:var(--color-primary-hl)}
+.wslot-thumb img{width:100%;height:100%;object-fit:cover}
+.wslot-label{font-size:10px;color:var(--color-text-faint);text-align:center;line-height:1.3}
+.wslot-del{position:absolute;top:-7px;right:-7px;width:20px;height:20px;border-radius:50%;background:var(--color-error);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;font-size:12px;line-height:1;opacity:0;transition:opacity var(--tr)}
+.wslot:hover .wslot-del{opacity:1}
+.wheel-hint{font-size:var(--tx-xs);color:var(--color-text-faint);text-align:center}
+/* Winner modal */
+.wheel-winner-photo{width:130px;height:130px;border-radius:50%;overflow:hidden;background:var(--color-surface-offset);border:3px solid var(--color-primary);display:flex;align-items:center;justify-content:center;margin:0 auto var(--sp3)}
+.wheel-winner-photo img{width:100%;height:100%;object-fit:cover}
+/* Confetti */
+@keyframes confettiFall{to{transform:translateY(110vh) rotate(700deg);opacity:0}}
+.confetti-piece{position:fixed;top:-14px;pointer-events:none;z-index:9999;animation:confettiFall linear forwards}
 </style>
 </head>
 <body>
@@ -236,20 +268,14 @@ input{font:inherit;color:inherit}
   <!-- HEADER -->
   <header class="header">
     <div class="header-left">
-      <a class="logo" href="#">
-        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-label="Дизайн Осмотр">
-          <rect width="28" height="28" rx="7" fill="currentColor" fill-opacity=".08"/>
-          <rect x="5" y="8" width="10" height="2" rx="1" fill="var(--color-primary)"/>
-          <rect x="5" y="13" width="7" height="2" rx="1" fill="var(--color-primary)" opacity=".7"/>
-          <rect x="5" y="18" width="5" height="2" rx="1" fill="var(--color-primary)" opacity=".4"/>
-          <circle cx="21" cy="13" r="5" stroke="var(--color-primary)" stroke-width="1.5" fill="none"/>
-          <path d="M19.5 13l1 1 2-2" stroke="var(--color-primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <span class="logo-text">Дизайн Осмотр</span>
-      </a>
+      <button class="app-tab active" id="apptab-osmotr" onclick="switchAppTab('osmotr')">Дизайн Осмотр</button>
+      <button class="app-tab" id="apptab-sync" onclick="switchAppTab('sync')">Синк</button>
     </div>
     <div class="header-right">
       <span id="syncDot" title="Данные сохранены" style="width:8px;height:8px;border-radius:50%;background:var(--color-text-faint);display:inline-block;flex-shrink:0;transition:background .3s"></span>
+      <button class="btn btn-ghost btn-icon" id="lockBtn" onclick="toggleLock()" aria-label="Разблокировать редактирование" title="Разблокировать редактирование">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </button>
       <button class="btn btn-ghost btn-icon" data-theme-toggle aria-label="Сменить тему">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
       </button>
@@ -258,6 +284,7 @@ input{font:inherit;color:inherit}
 
   <!-- MAIN -->
   <main class="main">
+    <div id="appview-osmotr">
     <div class="content">
       <!-- TABS -->
       <div class="tabs">
@@ -328,6 +355,14 @@ input{font:inherit;color:inherit}
         <div id="allLbContent"></div>
       </div>
     </div>
+    </div><!-- /appview-osmotr -->
+
+    <!-- ═══ СИНК TAB ═══ -->
+    <div id="appview-sync" style="display:none">
+      <div class="content" style="padding-top:var(--sp6)">
+        <div id="syncTabContent"></div>
+      </div>
+    </div>
   </main>
 </div>
 
@@ -342,6 +377,33 @@ input{font:inherit;color:inherit}
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeModal()">Отмена</button>
       <button class="btn btn-primary" onclick="confirmAdd()">Добавить</button>
+    </div>
+  </div>
+</div>
+
+<!-- WHEEL RESULT MODAL -->
+<div class="modal-overlay" id="wheelResultModal">
+  <div class="modal" role="dialog" aria-modal="true" style="text-align:center;max-width:320px">
+    <div id="wheelResultBody"></div>
+    <div class="modal-actions" style="justify-content:center;margin-top:var(--sp4)">
+      <button class="btn btn-primary" onclick="nextSpin()" style="min-width:150px;justify-content:center">Следующий →</button>
+    </div>
+  </div>
+</div>
+
+<!-- PASSWORD MODAL -->
+<div class="modal-overlay" id="pwModal">
+  <div class="modal" role="dialog" aria-modal="true">
+    <h2 class="modal-title">Режим редактирования</h2>
+    <p style="color:var(--color-text-muted);font-size:var(--tx-xs);margin-bottom:var(--sp4)">Введите пароль для доступа к редактированию данных</p>
+    <div class="form-group">
+      <label class="form-label" for="inpPw">Пароль</label>
+      <input class="form-input" type="password" id="inpPw" placeholder="••••••••" autocomplete="off">
+      <span id="pwError" style="color:var(--color-error);font-size:var(--tx-xs);margin-top:var(--sp1);display:none">Неверный пароль</span>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closePwModal()">Отмена</button>
+      <button class="btn btn-primary" onclick="confirmPw()">Войти</button>
     </div>
   </div>
 </div>
@@ -367,7 +429,77 @@ let participants = [];
 let sessions = {};   // 'YYYY-MM-DD' -> {pid: score}
 let history  = [];   // [{ts, pid, delta, wkey, scoreBefore, scoreAfter}]
 let bonuses  = {};   // 'YYYY-MM' -> {pid: bonusPoints}
+let wheelSlots = []; // [{id, image:base64|null, used:bool}]
 let idCounter = 100;
+
+// Wheel runtime state
+const WHEEL_COLORS = ['#4f98a3','#6daa45','#d163a7','#e8af34','#fd8b43','#5f7ad0','#d04f6a','#6d45b8','#43c9a8','#c9a843','#4fc97a','#c97a4f'];
+const _wImgCache = {}; // slotId → HTMLImageElement
+let _wAngle = 0;
+let _wSpinning = false;
+let _wWinner = null;
+
+// ═══════════════════════════════════════════════════════════
+// AUTH / LOCK
+// ═══════════════════════════════════════════════════════════
+const EDIT_PASSWORD = '1692540';
+let isUnlocked = false;
+let _pwCallback = null;
+
+function toggleLock(){
+  if(isUnlocked){ lockEdit(); } else { openPwModal(null); }
+}
+function lockEdit(){
+  isUnlocked=false;
+  updateLockUI();
+  renderScoring();
+  toast('Редактирование заблокировано');
+}
+function openPwModal(callback){
+  _pwCallback=callback;
+  document.getElementById('inpPw').value='';
+  document.getElementById('pwError').style.display='none';
+  document.getElementById('pwModal').classList.add('open');
+  setTimeout(()=>document.getElementById('inpPw').focus(),100);
+}
+function closePwModal(){
+  document.getElementById('pwModal').classList.remove('open');
+  _pwCallback=null;
+}
+function confirmPw(){
+  const val=document.getElementById('inpPw').value;
+  if(val===EDIT_PASSWORD){
+    isUnlocked=true;
+    updateLockUI();
+    closePwModal();
+    renderScoring();
+    if(_pwCallback){ _pwCallback(); _pwCallback=null; }
+    toast('Режим редактирования включён');
+  } else {
+    document.getElementById('pwError').style.display='';
+    document.getElementById('inpPw').value='';
+    document.getElementById('inpPw').focus();
+  }
+}
+function updateLockUI(){
+  const btn=document.getElementById('lockBtn');
+  if(!btn) return;
+  if(isUnlocked){
+    btn.innerHTML=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>`;
+    btn.title='Заблокировать редактирование';
+    btn.style.color='var(--color-primary)';
+  } else {
+    btn.innerHTML=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`;
+    btn.title='Разблокировать редактирование';
+    btn.style.color='';
+  }
+}
+document.addEventListener('keydown',e=>{
+  if(!document.getElementById('pwModal').classList.contains('open')) return;
+  if(e.key==='Enter') confirmPw();
+  if(e.key==='Escape') closePwModal();
+});
+document.getElementById('pwModal').addEventListener('click',e=>{ if(e.target===e.currentTarget) closePwModal(); });
 
 // Calendar state
 let calYear, calMonth, activeWeedKey;
@@ -460,6 +592,7 @@ async function loadData(){
     if(d.sessions && typeof d.sessions==='object') sessions = d.sessions;
     if(Array.isArray(d.history)) history = d.history;
     if(d.bonuses && typeof d.bonuses==='object') bonuses = d.bonuses;
+    if(Array.isArray(d.wheelSlots)) wheelSlots = d.wheelSlots;
     // синхронизируем idCounter чтобы не было коллизий ID
     participants.forEach(p=>{
       const n=parseInt((p.id||'').replace(/\D/g,''));
@@ -479,7 +612,7 @@ async function saveData(){
     const res = await fetch(API_URL+'/api/data',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({participants,sessions,history,bonuses})
+      body:JSON.stringify({participants,sessions,history,bonuses,wheelSlots})
     });
     if(!res.ok) throw new Error('HTTP '+res.status);
     setSyncStatus('idle');
@@ -570,59 +703,76 @@ function renderList(listId, people, type){
 
     const av=p.avatar?`<img src="${p.avatar}" alt="${esc(p.name)}" loading="lazy">`:`<span>${esc(initials(p.name))}</span>`;
 
+    const avatarHtml=isUnlocked
+      ?`<div class="avatar-wrap" onclick="triggerAvatar('${p.id}')" title="Загрузить фото">
+          <div class="avatar">${av}</div>
+          <div class="avatar-hint"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+          <input type="file" accept="image/png,image/jpeg,image/jpg,image/webp" class="avatar-file" id="avf-${p.id}" onchange="handleAvatar(event,'${p.id}')">
+        </div>`
+      :`<div class="avatar-wrap" style="cursor:default">
+          <div class="avatar">${av}</div>
+        </div>`;
+
+    const nameHtml=`<div class="name-edit-wrap">
+        <span class="p-name" id="pname-${p.id}" ${isUnlocked?`ondblclick="startEditName('${p.id}')" title="Двойной клик — редактировать"`:''}>${esc(p.name)}</span>
+        <input class="name-input" id="pinput-${p.id}" type="text" value="${esc(p.name)}" onblur="finishEditName('${p.id}')" onkeydown="nameKey(event,'${p.id}')">
+      </div>`;
+
     let btns='';
-    if(type==='presenter'){
-      btns=`<div class="score-btns">
-        <button class="sc-btn plus" onclick="adj('${p.id}',1)" title="+1">+1</button>
-        <button class="sc-btn plus" onclick="adj('${p.id}',2)" title="+2">+2</button>
-      </div>`;
-    } else {
-      btns=`<div class="score-btns">
-        <button class="sc-btn plus" onclick="adj('${p.id}',0.5)" title="+0.5">+½</button>
-      </div>`;
+    if(isUnlocked){
+      if(type==='presenter'){
+        btns=`<div class="score-btns">
+          <button class="sc-btn plus" onclick="adj('${p.id}',1)" title="+1">+1</button>
+          <button class="sc-btn plus" onclick="adj('${p.id}',2)" title="+2">+2</button>
+        </div>`;
+      } else {
+        btns=`<div class="score-btns">
+          <button class="sc-btn plus" onclick="adj('${p.id}',0.5)" title="+0.5">+½</button>
+        </div>`;
+      }
     }
 
-    row.innerHTML=`
-      <div class="avatar-wrap" onclick="triggerAvatar('${p.id}')" title="Загрузить фото">
-        <div class="avatar">${av}</div>
-        <div class="avatar-hint"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
-        <input type="file" accept="image/png,image/jpeg,image/jpg,image/webp" class="avatar-file" id="avf-${p.id}" onchange="handleAvatar(event,'${p.id}')">
-      </div>
-      <div class="name-edit-wrap">
-        <span class="p-name" id="pname-${p.id}" ondblclick="startEditName('${p.id}')" title="Двойной клик — редактировать">${esc(p.name)}</span>
-        <input class="name-input" id="pinput-${p.id}" type="text" value="${esc(p.name)}" onblur="finishEditName('${p.id}')" onkeydown="nameKey(event,'${p.id}')">
-      </div>
-      <div class="score-ctrl">
-        ${btns}
-        <span class="sc-val${score>0?' pos':''}" id="sv-${p.id}">${fmt(score)}</span>
-        <div class="row-actions">
+    const rowActionsHtml=isUnlocked
+      ?`<div class="row-actions">
           <button class="reset-btn" onclick="resetOne('${p.id}')" title="Сброс баллов за эту сессию" aria-label="Сбросить">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
           </button>
           <button class="del-btn" onclick="delParticipant('${p.id}')" title="Удалить участника" aria-label="Удалить">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18M19 6l-1 14H6L5 6M10 11v6M14 11v6M8 6V4h8v2"/></svg>
           </button>
-        </div>
+        </div>`
+      :'';
+
+    row.innerHTML=`
+      ${avatarHtml}
+      ${nameHtml}
+      <div class="score-ctrl">
+        ${btns}
+        <span class="sc-val${score>0?' pos':''}" id="sv-${p.id}">${fmt(score)}</span>
+        ${rowActionsHtml}
       </div>
     `;
     list.appendChild(row);
   });
 
-  // Add button
-  const addEl=document.createElement('div');
-  addEl.className='add-row';
-  addEl.setAttribute('role','button');
-  addEl.setAttribute('tabindex','0');
-  addEl.innerHTML=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg> Добавить участника`;
-  addEl.onclick=()=>openModal(type);
-  addEl.onkeydown=(e)=>{ if(e.key==='Enter') openModal(type); };
-  list.appendChild(addEl);
+  // Add button — only when unlocked
+  if(isUnlocked){
+    const addEl=document.createElement('div');
+    addEl.className='add-row';
+    addEl.setAttribute('role','button');
+    addEl.setAttribute('tabindex','0');
+    addEl.innerHTML=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg> Добавить участника`;
+    addEl.onclick=()=>openModal(type);
+    addEl.onkeydown=(e)=>{ if(e.key==='Enter') openModal(type); };
+    list.appendChild(addEl);
+  }
 }
 
 // ═══════════════════════════════════════════════════════════
 // SCORE ACTIONS
 // ═══════════════════════════════════════════════════════════
 function adj(pid, delta){
+  if(!isUnlocked){ openPwModal(()=>adj(pid,delta)); return; }
   if(!activeWeedKey){ toast('Выберите сессию в календаре'); return; }
   const cur=getScore(pid,activeWeedKey);
   const nv=parseFloat((cur+delta).toFixed(2));
@@ -641,6 +791,7 @@ function adj(pid, delta){
 }
 
 function resetOne(pid){
+  if(!isUnlocked) return;
   if(!activeWeedKey) return;
   setScore(pid,activeWeedKey,0);
   const el=document.getElementById('sv-'+pid);
@@ -652,7 +803,7 @@ function resetOne(pid){
 // ═══════════════════════════════════════════════════════════
 // AVATAR
 // ═══════════════════════════════════════════════════════════
-function triggerAvatar(pid){ const i=document.getElementById('avf-'+pid); if(i) i.click(); }
+function triggerAvatar(pid){ if(!isUnlocked) return; const i=document.getElementById('avf-'+pid); if(i) i.click(); }
 function handleAvatar(e,pid){
   const file=e.target.files[0]; if(!file) return;
   const reader=new FileReader();
@@ -667,6 +818,7 @@ function handleAvatar(e,pid){
 // NAME EDIT
 // ═══════════════════════════════════════════════════════════
 function startEditName(pid){
+  if(!isUnlocked) return;
   document.getElementById('pname-'+pid).style.display='none';
   const inp=document.getElementById('pinput-'+pid);
   inp.style.display='block';
@@ -692,6 +844,7 @@ function nameKey(e,pid){ if(e.key==='Enter'||e.key==='Escape') finishEditName(pi
 // DELETE PARTICIPANT
 // ═══════════════════════════════════════════════════════════
 function delParticipant(pid){
+  if(!isUnlocked) return;
   if(!confirm('Удалить участника? Его баллы тоже будут удалены.')) return;
   participants=participants.filter(p=>p.id!==pid);
   Object.keys(sessions).forEach(k=>{ delete sessions[k][pid]; });
@@ -704,6 +857,7 @@ function delParticipant(pid){
 // ADD MODAL
 // ═══════════════════════════════════════════════════════════
 function openModal(type){
+  if(!isUnlocked){ openPwModal(()=>openModal(type)); return; }
   pendingAddType=type;
   document.getElementById('inpName').value='';
   document.getElementById('inpName').style.borderColor='';
@@ -936,6 +1090,424 @@ function switchTab(tab){
   if(tab==='lb-month'){ if(!lbYear) initMonthLb(); else renderMonthLb(); }
   if(tab==='lb-all')   renderAllLb();
   if(tab==='history')  renderHistory();
+}
+
+// ═══════════════════════════════════════════════════════════
+// APP-LEVEL TABS
+// ═══════════════════════════════════════════════════════════
+function switchAppTab(tab){
+  ['osmotr','sync'].forEach(t=>{
+    document.getElementById('appview-'+t).style.display=t===tab?'':'none';
+    document.getElementById('apptab-'+t).classList.toggle('active',t===tab);
+  });
+  if(tab==='sync') renderWheelTab();
+}
+
+// ═══════════════════════════════════════════════════════════
+// WHEEL — INIT & SLOTS
+// ═══════════════════════════════════════════════════════════
+function initWheelSlots(){
+  if(wheelSlots.length>0){
+    // migrate old slots that don't have stats yet
+    wheelSlots.forEach(s=>{ if(!s.stats) s.stats={first:0,last:0,total:0}; });
+    return;
+  }
+  for(let i=0;i<5;i++) wheelSlots.push({id:uid(),image:null,used:false,stats:{first:0,last:0,total:0}});
+}
+
+function activeWheelSlots(){ return wheelSlots.filter(s=>!s.used); }
+
+// ═══════════════════════════════════════════════════════════
+// WHEEL — RENDER TAB
+// ═══════════════════════════════════════════════════════════
+function renderWheelTab(){
+  initWheelSlots();
+  const cont=document.getElementById('syncTabContent');
+  cont.innerHTML=`
+    <div class="wheel-page">
+      <div class="wheel-top">
+        <div class="wheel-canvas-wrap" id="wheelWrap" onclick="onWheelClick()" title="Нажмите чтобы крутить">
+          <canvas id="wheelCanvas" width="580" height="580"></canvas>
+        </div>
+        <div class="wheel-pointer">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 12l-9 6.5V5.5z"/></svg>
+        </div>
+      </div>
+      <div class="wheel-bottom">
+        <div class="wheel-bottom-hd">
+          <span style="font-size:var(--tx-xs);font-weight:600;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.06em">
+            Участники <span class="cnt-badge" id="wCnt">0</span>
+          </span>
+          <div class="wheel-btns">
+            <button class="btn btn-secondary" onclick="addWheelSlot()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
+              Добавить
+            </button>
+            <button class="btn btn-secondary" onclick="resetWheelUsed()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+              Заново
+            </button>
+          </div>
+        </div>
+        <div class="wheel-slots-row" id="wList"></div>
+        <div class="wheel-hint">Нажмите на миниатюру слота чтобы загрузить фото, затем кликните на колесо</div>
+        <div class="divider"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp3)">
+          <span style="font-size:var(--tx-xs);font-weight:600;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.06em">Статистика</span>
+          <button class="btn btn-ghost" onclick="resetWheelStats()" style="font-size:var(--tx-xs)">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+            Сбросить счётчик
+          </button>
+        </div>
+        <div id="wStats"></div>
+      </div>
+    </div>`;
+  renderWheelSlots();
+  renderWheelStats();
+  preloadWheelImages(()=>drawWheel(_wAngle));
+}
+
+function renderWheelSlots(){
+  const list=document.getElementById('wList');
+  const cnt=document.getElementById('wCnt');
+  if(!list) return;
+  if(cnt) cnt.textContent=wheelSlots.length;
+  list.innerHTML='';
+  wheelSlots.forEach((slot,i)=>{
+    const row=document.createElement('div');
+    row.className='wslot'+(slot.used?' used':'');
+    const thumb=slot.image
+      ?`<img src="${slot.image}" alt="">`
+      :`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--color-text-faint)"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`;
+    const label=slot.used?'Выбыл':slot.image?`Слот ${i+1}`:`Слот ${i+1}`;
+    row.innerHTML=`
+      <div class="wslot-thumb" onclick="triggerSlotUpload('${slot.id}')" title="Загрузить фото">
+        ${thumb}
+        <input type="file" accept="image/png,image/jpeg,image/jpg,image/webp" style="display:none" id="wsf-${slot.id}" onchange="handleSlotImage(event,'${slot.id}')">
+      </div>
+      <span class="wslot-label">${label}${slot.used?' ✓':''}</span>
+      <button class="wslot-del" onclick="removeWheelSlot('${slot.id}')" title="Удалить">×</button>`;
+    list.appendChild(row);
+  });
+}
+
+function triggerSlotUpload(id){ document.getElementById('wsf-'+id)?.click(); }
+
+function handleSlotImage(e,id){
+  const file=e.target.files[0]; if(!file) return;
+  // Reset input so same file can be re-selected later
+  e.target.value='';
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    // Find ONLY this specific slot by its unique id
+    const slot=wheelSlots.find(s=>s.id===id);
+    if(!slot) return;
+    // Update image for THIS slot only
+    slot.image=ev.target.result;
+    // Remove old cached image for this slot
+    delete _wImgCache[id];
+    // Preload new image, then redraw
+    const img=new Image();
+    img.onload=()=>{
+      _wImgCache[id]=img;
+      drawWheel(_wAngle);
+    };
+    img.src=slot.image;
+    const slotNum=wheelSlots.indexOf(slot)+1;
+    renderWheelSlots();
+    scheduleSync();
+    toast(`Фото загружено в слот ${slotNum}`);
+  };
+  reader.readAsDataURL(file);
+}
+
+function addWheelSlot(){
+  if(wheelSlots.length>=12){ toast('Максимум 12 слотов'); return; }
+  wheelSlots.push({id:uid(),image:null,used:false});
+  renderWheelSlots(); drawWheel(_wAngle); scheduleSync();
+}
+
+function removeWheelSlot(id){
+  if(wheelSlots.length<=2){ toast('Минимум 2 слота'); return; }
+  wheelSlots=wheelSlots.filter(s=>s.id!==id);
+  delete _wImgCache[id];
+  renderWheelSlots(); drawWheel(_wAngle); scheduleSync();
+}
+
+function resetWheelUsed(){
+  wheelSlots.forEach(s=>s.used=false);
+  _wAngle=0;
+  renderWheelSlots(); drawWheel(_wAngle); scheduleSync();
+  toast('Все участники снова в игре');
+}
+
+// ═══════════════════════════════════════════════════════════
+// WHEEL — CANVAS DRAWING
+// ═══════════════════════════════════════════════════════════
+function preloadWheelImages(cb){
+  let pending=0;
+  wheelSlots.forEach(slot=>{
+    if(slot.image&&!_wImgCache[slot.id]){
+      pending++;
+      const img=new Image();
+      img.onload=img.onerror=()=>{ if(--pending===0&&cb) cb(); };
+      img.src=slot.image;
+      _wImgCache[slot.id]=img;
+    }
+  });
+  if(pending===0&&cb) cb();
+}
+
+function drawWheel(angle){
+  const canvas=document.getElementById('wheelCanvas'); if(!canvas) return;
+  const ctx=canvas.getContext('2d');
+  const w=canvas.width,h=canvas.height,cx=w/2,cy=h/2,r=Math.min(cx,cy)-6;
+  const dark=document.documentElement.getAttribute('data-theme')==='dark';
+
+  // Primary colors (no CSS vars in canvas)
+  const primary    = dark?'#4f98a3':'#01696f';
+  const primaryAlt = dark?'#3a7d87':'#0c4e54';
+  const stroke     = dark?'#171614':'#ffffff';
+  const hubBg      = dark?'#1c1b19':'#f9f8f5';
+
+  ctx.clearRect(0,0,w,h);
+  const active=activeWheelSlots();
+  const n=active.length;
+
+  if(n===0){
+    ctx.beginPath(); ctx.arc(cx,cy,r,0,2*Math.PI);
+    ctx.fillStyle=dark?'#2d2c2a':'#edeae5'; ctx.fill();
+    ctx.strokeStyle=dark?'#393836':'#d4d1ca'; ctx.lineWidth=3; ctx.stroke();
+    ctx.fillStyle=dark?'#797876':'#7a7974';
+    ctx.font='600 20px Inter,sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('Все выбыли',cx,cy); return;
+  }
+
+  const sliceAngle=(2*Math.PI)/n;
+
+  // ── Pass 1: draw each sector in its own isolated save/restore ──
+  active.forEach((slot,i)=>{
+    const startA=angle+i*sliceAngle, endA=angle+(i+1)*sliceAngle, midA=angle+(i+0.5)*sliceAngle;
+    const globalIdx=wheelSlots.indexOf(slot); // stable slot number (1-based label)
+
+    ctx.save();
+    // Hard clip to THIS sector — nothing can bleed into neighbouring sectors
+    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,r,startA,endA); ctx.closePath(); ctx.clip();
+
+    // Sector background colour
+    ctx.fillStyle = i%2===0 ? primary : primaryAlt;
+    ctx.fillRect(0,0,w,h); // fill canvas — clip keeps it to this sector only
+
+    // Image for THIS slot — keyed by unique slot.id, never shared with other slots
+    const cached=_wImgCache[slot.id];
+    if(cached&&cached.complete&&cached.naturalWidth>0){
+      const iw=cached.naturalWidth, ih=cached.naturalHeight;
+      const scale=(r*2)/Math.min(iw,ih);
+      const dw=iw*scale, dh=ih*scale;
+      ctx.drawImage(cached, cx-dw/2, cy-dh/2, dw, dh);
+      // Subtle dark tint keeps the wheel cohesive
+      ctx.fillStyle='rgba(0,0,0,0.15)';
+      ctx.fillRect(0,0,w,h);
+      // Small slot number at outer part of sector so user can verify
+      const nx=cx+Math.cos(midA)*r*0.76, ny=cy+Math.sin(midA)*r*0.76;
+      ctx.fillStyle='rgba(255,255,255,0.8)';
+      ctx.font=`700 ${Math.round(r*0.065)}px Inter,sans-serif`;
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(String(globalIdx+1), nx, ny);
+    } else {
+      // No image yet — large slot number + upload hint
+      const tx=cx+Math.cos(midA)*r*0.58, ty=cy+Math.sin(midA)*r*0.58;
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      // Slot number (large)
+      ctx.fillStyle='rgba(255,255,255,0.75)';
+      ctx.font=`700 ${Math.round(r*0.13)}px Inter,sans-serif`;
+      ctx.fillText(String(globalIdx+1), tx, ty);
+      // Upload hint below
+      ctx.fillStyle='rgba(255,255,255,0.4)';
+      ctx.font=`500 ${Math.round(r*0.055)}px Inter,sans-serif`;
+      ctx.fillText('+ фото', tx, ty+Math.round(r*0.16));
+    }
+
+    ctx.restore(); // ← clip is fully removed; next sector starts clean
+  });
+
+  // ── Pass 2: separator lines between sectors ──
+  active.forEach((_,i)=>{
+    const startA=angle+i*sliceAngle;
+    ctx.beginPath(); ctx.moveTo(cx,cy);
+    ctx.lineTo(cx+Math.cos(startA)*r, cy+Math.sin(startA)*r);
+    ctx.strokeStyle=stroke; ctx.lineWidth=2.5; ctx.stroke();
+  });
+
+  // Outer ring
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,2*Math.PI);
+  ctx.strokeStyle=dark?'#227f8b':'#0c4e54'; ctx.lineWidth=5; ctx.stroke();
+
+  // Center hub
+  const hubR=r*0.09;
+  ctx.beginPath(); ctx.arc(cx,cy,hubR,0,2*Math.PI);
+  ctx.fillStyle=hubBg; ctx.fill();
+  ctx.strokeStyle=primary; ctx.lineWidth=3; ctx.stroke();
+
+  // Play icon (idle only)
+  if(!_wSpinning){
+    ctx.fillStyle=primary;
+    ctx.font=`bold ${Math.round(hubR*0.9)}px Inter,sans-serif`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('▶',cx+1,cy);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// WHEEL — SPIN ANIMATION
+// ═══════════════════════════════════════════════════════════
+function onWheelClick(){
+  if(_wSpinning) return;
+  const active=activeWheelSlots();
+  if(active.length===0){ toast('Все выбыли — нажми «Заново»'); return; }
+  spinWheel();
+}
+
+function spinWheel(){
+  const active=activeWheelSlots();
+  if(active.length===0) return;
+  _wSpinning=true;
+  document.getElementById('wheelWrap')?.classList.add('spinning');
+
+  const n=active.length;
+  const sliceAngle=(2*Math.PI)/n;
+  const winnerIdx=Math.floor(Math.random()*n);
+  _wWinner=active[winnerIdx];
+
+  // Compute target angle: winner sector center lands at pointer (0 rad = right side)
+  const targetMod=((-(winnerIdx+0.5)*sliceAngle)%(2*Math.PI)+2*Math.PI)%(2*Math.PI);
+  const currentMod=((_wAngle%(2*Math.PI))+2*Math.PI)%(2*Math.PI);
+  let delta=targetMod-currentMod;
+  if(delta<0) delta+=2*Math.PI;
+  delta+=7*2*Math.PI; // 7 full spins before stopping
+
+  const startAngle=_wAngle, endAngle=startAngle+delta;
+  const duration=4400;
+  const startTime=performance.now();
+
+  function easeOutQuart(t){ return 1-Math.pow(1-t,4); }
+
+  function animate(now){
+    const t=Math.min((now-startTime)/duration,1);
+    _wAngle=startAngle+easeOutQuart(t)*delta;
+    drawWheel(_wAngle);
+    if(t<1){ requestAnimationFrame(animate); }
+    else {
+      _wAngle=endAngle;
+      _wSpinning=false;
+      document.getElementById('wheelWrap')?.classList.remove('spinning');
+      drawWheel(_wAngle);
+      showWheelResult(_wWinner);
+    }
+  }
+  requestAnimationFrame(animate);
+}
+
+// ═══════════════════════════════════════════════════════════
+// WHEEL — RESULT & CONFETTI
+// ═══════════════════════════════════════════════════════════
+function showWheelResult(slot){
+  showConfetti();
+  const body=document.getElementById('wheelResultBody');
+  if(body){
+    const photo=slot.image
+      ?`<div class="wheel-winner-photo"><img src="${slot.image}" alt=""></div>`
+      :`<div style="font-size:3rem;margin-bottom:var(--sp3)">🎉</div>`;
+    body.innerHTML=`
+      ${photo}
+      <div style="font-size:var(--tx-lg);font-weight:700;color:var(--color-text);margin-bottom:var(--sp1)">Победитель!</div>
+      <div style="font-size:var(--tx-xs);color:var(--color-text-muted)">Этот сектор выбывает из следующего круга</div>`;
+  }
+  document.getElementById('wheelResultModal')?.classList.add('open');
+}
+
+function nextSpin(){
+  document.getElementById('wheelResultModal')?.classList.remove('open');
+  if(_wWinner){
+    // Count active slots BEFORE marking winner as used (includes winner itself)
+    const activeNow=activeWheelSlots().length;
+    if(!_wWinner.stats) _wWinner.stats={first:0,last:0,total:0};
+    _wWinner.stats.total=(_wWinner.stats.total||0)+1;
+    // First in round = no slots used yet (all were active)
+    if(activeNow===wheelSlots.length) _wWinner.stats.first=(_wWinner.stats.first||0)+1;
+    // Last in round = only this slot was left
+    if(activeNow===1) _wWinner.stats.last=(_wWinner.stats.last||0)+1;
+    _wWinner.used=true;
+    _wWinner=null;
+    scheduleSync();
+  }
+  renderWheelSlots();
+  renderWheelStats();
+  drawWheel(_wAngle);
+}
+
+// ═══════════════════════════════════════════════════════════
+// WHEEL — STATISTICS
+// ═══════════════════════════════════════════════════════════
+function renderWheelStats(){
+  const el=document.getElementById('wStats'); if(!el) return;
+  const hasStats=wheelSlots.some(s=>s.stats&&s.stats.total>0);
+  if(!hasStats){
+    el.innerHTML=`<div style="text-align:center;padding:var(--sp3) var(--sp4);color:var(--color-text-faint);font-size:var(--tx-xs);background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg)">Статистика появится после первого вращения</div>`;
+    return;
+  }
+  const maxTotal=Math.max(1,...wheelSlots.map(s=>(s.stats&&s.stats.total)||0));
+  let html=`<div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);overflow:hidden">`;
+  // Header
+  html+=`<div style="display:grid;grid-template-columns:32px 1fr 80px 80px 72px;gap:var(--sp3);align-items:center;padding:var(--sp2) var(--sp4);background:var(--color-surface-offset);border-bottom:1px solid var(--color-divider)">
+    <div></div>
+    <div style="font-size:10px;font-weight:600;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.05em">Слот</div>
+    <div style="font-size:10px;font-weight:600;color:var(--color-gold);text-align:center;letter-spacing:.05em">🥇 Первым</div>
+    <div style="font-size:10px;font-weight:600;color:var(--color-primary);text-align:center;letter-spacing:.05em">🏁 Последним</div>
+    <div style="font-size:10px;font-weight:600;color:var(--color-text-muted);text-align:right;letter-spacing:.05em">Итого</div>
+  </div>`;
+  wheelSlots.forEach((slot,i)=>{
+    const s=slot.stats||{first:0,last:0,total:0};
+    const pct=Math.round(((s.total||0)/maxTotal)*100);
+    const thumb=slot.image
+      ?`<img src="${slot.image}" style="width:26px;height:26px;border-radius:50%;object-fit:cover;display:block">`
+      :`<div style="width:26px;height:26px;border-radius:50%;background:var(--color-surface-offset);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--color-text-muted)">${i+1}</div>`;
+    const isLast=i===wheelSlots.length-1;
+    html+=`<div style="display:grid;grid-template-columns:32px 1fr 80px 80px 72px;gap:var(--sp3);align-items:center;padding:var(--sp3) var(--sp4);${isLast?'':'border-bottom:1px solid var(--color-divider);'}position:relative">
+      <div style="display:flex;align-items:center">${thumb}</div>
+      <div>
+        <div style="font-size:var(--tx-xs);font-weight:500;color:var(--color-text);margin-bottom:3px">Слот ${i+1}</div>
+        <div style="height:4px;border-radius:2px;background:var(--color-surface-offset);overflow:hidden">
+          <div style="height:100%;width:${pct}%;background:var(--color-primary);border-radius:2px;transition:width .4s ease"></div>
+        </div>
+      </div>
+      <div style="text-align:center;font-size:var(--tx-sm);font-weight:700;color:var(--color-gold)">${s.first||0}</div>
+      <div style="text-align:center;font-size:var(--tx-sm);font-weight:700;color:var(--color-primary)">${s.last||0}</div>
+      <div style="text-align:right;font-size:var(--tx-sm);font-weight:600;color:var(--color-text-muted)">${s.total||0}</div>
+    </div>`;
+  });
+  html+=`</div>`;
+  el.innerHTML=html;
+}
+
+function resetWheelStats(){
+  if(!confirm('Сбросить всю статистику вращений?')) return;
+  wheelSlots.forEach(s=>{ s.stats={first:0,last:0,total:0}; });
+  renderWheelStats();
+  scheduleSync();
+  toast('Статистика сброшена');
+}
+
+function showConfetti(){
+  const colors=['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#c77dff','#ff9f43','#ff6bff','#43ffda'];
+  for(let i=0;i<90;i++){
+    const el=document.createElement('div');
+    el.className='confetti-piece';
+    const sz=Math.random()*9+4;
+    el.style.cssText=`left:${Math.random()*100}vw;width:${sz}px;height:${sz*(Math.random()>.5?1:.35)}px;background:${colors[Math.floor(Math.random()*colors.length)]};border-radius:${Math.random()>.5?'50%':'2px'};animation-duration:${(Math.random()*2+2.2).toFixed(1)}s;animation-delay:${(Math.random()*.6).toFixed(2)}s;`;
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),4200);
+  }
 }
 
 // ═══════════════════════════════════════════════════════════
