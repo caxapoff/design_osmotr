@@ -17,8 +17,8 @@ app.use(cors({
   }
 }));
 
-// Лимит 10 МБ — аватары хранятся как base64
-app.use(express.json({ limit: '10mb' }));
+// Лимит 50 МБ — аватары участников и фото слотов колеса хранятся как base64
+app.use(express.json({ limit: '50mb' }));
 
 // ─── Хранилище данных ────────────────────────────────────────
 const DATA_FILE = path.join(__dirname, 'data.json');
