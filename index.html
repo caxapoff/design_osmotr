@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Дизайн Осмотр</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&display=swap" rel="stylesheet">
+<style>
+:root,[data-theme="light"]{
+  --color-bg:#f7f6f2;--color-surface:#f9f8f5;--color-surface-2:#fbfbf9;
+  --color-surface-offset:#f3f0ec;--color-surface-offset-2:#edeae5;--color-surface-dynamic:#e6e4df;
+  --color-divider:#dcd9d5;--color-border:#d4d1ca;
+  --color-text:#28251d;--color-text-muted:#7a7974;--color-text-faint:#bab9b4;--color-text-inverse:#f9f8f4;
+  --color-primary:#01696f;--color-primary-hover:#0c4e54;--color-primary-active:#0f3638;--color-primary-hl:#cedcd8;
+  --color-success:#437a22;--color-success-hover:#2e5c10;--color-success-hl:#d4dfcc;
+  --color-error:#a12c7b;--color-error-hover:#7d1e5e;--color-error-hl:#e0ced7;
+  --color-gold:#d19900;--color-gold-hl:#e9e0c6;
+  --color-orange:#da7101;--color-orange-hl:#e7d7c4;
+  --color-silver:#888;--color-silver-hl:#e8e8e8;
+  --radius-sm:.375rem;--radius-md:.5rem;--radius-lg:.75rem;--radius-xl:1rem;--radius-full:9999px;
+  --tr:180ms cubic-bezier(.16,1,.3,1);
+  --sh-sm:0 1px 2px oklch(.2 .01 80/.06);--sh-md:0 4px 12px oklch(.2 .01 80/.08);--sh-lg:0 12px 32px oklch(.2 .01 80/.12);
+  --sp1:.25rem;--sp2:.5rem;--sp3:.75rem;--sp4:1rem;--sp5:1.25rem;--sp6:1.5rem;--sp8:2rem;--sp10:2.5rem;--sp12:3rem;--sp16:4rem;
+  --tx-xs:clamp(.75rem,.7rem + .25vw,.875rem);--tx-sm:clamp(.875rem,.8rem + .35vw,1rem);
+  --tx-base:clamp(1rem,.95rem + .25vw,1.125rem);--tx-lg:clamp(1.125rem,1rem + .75vw,1.5rem);
+  --font:Inter,'Helvetica Neue',sans-serif;
+}
+[data-theme="dark"]{
+  --color-bg:#171614;--color-surface:#1c1b19;--color-surface-2:#201f1d;
+  --color-surface-offset:#1d1c1a;--color-surface-offset-2:#22211f;--color-surface-dynamic:#2d2c2a;
+  --color-divider:#262523;--color-border:#393836;
+  --color-text:#cdccca;--color-text-muted:#797876;--color-text-faint:#5a5957;--color-text-inverse:#2b2a28;
+  --color-primary:#4f98a3;--color-primary-hover:#227f8b;--color-primary-active:#1a626b;--color-primary-hl:#313b3b;
+  --color-success:#6daa45;--color-success-hover:#4d8f25;--color-success-hl:#3a4435;
+  --color-error:#d163a7;--color-error-hover:#b9478f;--color-error-hl:#4c3d46;
+  --color-gold:#e8af34;--color-gold-hl:#4d4332;
+  --color-orange:#fdab43;--color-orange-hl:#564b3e;
+  --color-silver:#aaa;--color-silver-hl:#333;
+  --sh-sm:0 1px 2px oklch(0 0 0/.2);--sh-md:0 4px 12px oklch(0 0 0/.3);--sh-lg:0 12px 32px oklch(0 0 0/.4);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased;scroll-behavior:smooth}
+body{min-height:100dvh;font-family:var(--font);font-size:var(--tx-sm);color:var(--color-text);background:var(--color-bg);line-height:1.5;transition:background var(--tr),color var(--tr)}
+img{display:block;max-width:100%;background:var(--color-surface-offset)}
+button{cursor:pointer;background:none;border:none;font:inherit;color:inherit}
+input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--color-primary);outline-offset:3px;border-radius:var(--radius-sm)}
+
+/* APP SHELL */
+.app{display:grid;grid-template-rows:auto 1fr;height:100dvh;overflow:hidden}
+.header{display:flex;align-items:center;justify-content:space-between;padding:var(--sp3) var(--sp6);background:var(--color-surface);border-bottom:1px solid var(--color-divider);gap:var(--sp4);z-index:50}
+.header-left{display:flex;align-items:center;gap:var(--sp3)}
+.logo{display:flex;align-items:center;gap:var(--sp2);color:var(--color-text);text-decoration:none}
+.logo-text{font-size:var(--tx-sm);font-weight:700;letter-spacing:-.01em}
+.header-right{display:flex;align-items:center;gap:var(--sp2)}
+.main{overflow-y:auto;overscroll-behavior:contain;padding:var(--sp6)}
+.content{max-width:900px;margin:0 auto}
+
+/* TABS */
+.tabs{display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp6)}
+    .tabs-main{display:flex;gap:var(--sp1);background:var(--color-surface-offset);border-radius:var(--radius-lg);padding:var(--sp1)}
+
+.tab{padding:var(--sp2) var(--sp4);border-radius:var(--radius-md);font-size:var(--tx-xs);font-weight:500;color:var(--color-text-muted);cursor:pointer;transition:background var(--tr),color var(--tr);border:none;background:transparent}
+.tab.active{background:var(--color-surface-2);color:var(--color-text);box-shadow:var(--sh-sm)}
+.tab:hover:not(.active){color:var(--color-text);background:color-mix(in oklab,var(--color-surface-2) 50%,transparent)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:var(--sp2);padding:var(--sp2) var(--sp3);border-radius:var(--radius-md);font-size:var(--tx-xs);font-weight:500;white-space:nowrap;transition:background var(--tr),color var(--tr),border-color var(--tr);cursor:pointer;border:1px solid transparent}
+.btn-primary{background:var(--color-primary);color:var(--color-text-inverse)}
+.btn-primary:hover{background:var(--color-primary-hover)}
+.btn-secondary{background:var(--color-surface-offset);color:var(--color-text);border-color:var(--color-border)}
+.btn-secondary:hover{background:var(--color-surface-dynamic)}
+.btn-ghost{background:transparent;color:var(--color-text-muted);padding:var(--sp2)}
+.btn-ghost:hover{background:var(--color-surface-offset);color:var(--color-text)}
+.btn-icon{width:32px;height:32px;padding:0;display:inline-flex;align-items:center;justify-content:center;border-radius:var(--radius-md)}
+
+/* CALENDAR STRIP */
+.cal-section{margin-bottom:var(--sp6)}
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp3)}
+.cal-month{font-size:var(--tx-sm);font-weight:600;color:var(--color-text)}
+.cal-nav{display:flex;align-items:center;gap:var(--sp1)}
+.cal-strip{display:flex;gap:var(--sp2);overflow-x:auto;padding-bottom:var(--sp1);scrollbar-width:none}
+.cal-strip::-webkit-scrollbar{display:none}
+.week-pill{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:2px;padding:var(--sp2) var(--sp3);border-radius:var(--radius-lg);border:1px solid var(--color-border);background:var(--color-surface);cursor:pointer;transition:background var(--tr),border-color var(--tr),box-shadow var(--tr);min-width:72px}
+.week-pill:hover{background:var(--color-surface-offset);border-color:var(--color-primary)}
+.week-pill.active{background:var(--color-primary-hl);border-color:var(--color-primary);box-shadow:var(--sh-sm)}
+.week-date{font-size:var(--tx-xs);font-weight:600;color:var(--color-text);font-variant-numeric:tabular-nums}
+.week-label{font-size:10px;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.04em}
+.week-dot{width:5px;height:5px;border-radius:50%;background:var(--color-primary);margin-top:2px}
+.week-dot.hidden{visibility:hidden}
+
+/* SECTION HEADER */
+.section-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp3)}
+.section-title{font-size:var(--tx-xs);font-weight:600;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:var(--sp2)}
+.cnt-badge{font-size:var(--tx-xs);color:var(--color-text-muted);background:var(--color-surface-offset);padding:1px var(--sp2);border-radius:var(--radius-full);border:1px solid var(--color-border)}
+.hint-text{font-size:var(--tx-xs);color:var(--color-text-faint)}
+
+/* PARTICIPANT LIST */
+.p-list{display:flex;flex-direction:column;gap:var(--sp2);margin-bottom:var(--sp4)}
+
+/* PARTICIPANT ROW */
+.p-row{display:grid;align-items:center;gap:var(--sp3);background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--sp3) var(--sp4);transition:box-shadow var(--tr),border-color var(--tr)}
+.p-row:hover{box-shadow:var(--sh-sm)}
+.p-row.presenter-row{grid-template-columns:44px 1fr auto}
+.p-row.reviewer-row{grid-template-columns:44px 1fr auto}
+
+.avatar-wrap{position:relative;flex-shrink:0;cursor:pointer;width:44px;height:44px}
+.avatar{width:44px;height:44px;border-radius:var(--radius-full);overflow:hidden;background:var(--color-surface-offset);display:flex;align-items:center;justify-content:center;font-size:var(--tx-sm);font-weight:700;color:var(--color-text-muted);border:2px solid var(--color-border);transition:border-color var(--tr)}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.avatar-hint{position:absolute;inset:0;border-radius:var(--radius-full);background:oklch(0 0 0/.45);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity var(--tr)}
+.avatar-wrap:hover .avatar-hint{opacity:1}
+.avatar-hint svg{color:#fff}
+.avatar-file{display:none}
+
+.name-edit-wrap{display:flex;align-items:center;gap:var(--sp2);min-width:0}
+.p-name{font-size:var(--tx-sm);font-weight:600;color:var(--color-text);cursor:text;border-bottom:1px dashed transparent;transition:border-color var(--tr);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.p-name:hover{border-color:var(--color-border)}
+.name-input{font-size:var(--tx-sm);font-weight:600;color:var(--color-text);background:var(--color-surface-offset);border:1px solid var(--color-primary);border-radius:var(--radius-sm);padding:2px var(--sp2);outline:none;width:100%;display:none}
+
+/* SCORE CONTROLS */
+.score-ctrl{display:flex;align-items:center;gap:var(--sp2)}
+.score-btns{display:flex;align-items:center;gap:var(--sp1)}
+.sc-btn{height:28px;padding:0 var(--sp2);border-radius:var(--radius-md);font-size:var(--tx-xs);font-weight:600;border:1px solid var(--color-border);background:var(--color-surface-offset);color:var(--color-text-muted);cursor:pointer;transition:background var(--tr),color var(--tr),border-color var(--tr);white-space:nowrap;line-height:1}
+.sc-btn:active{transform:scale(.93)}
+.sc-btn.plus:hover{background:var(--color-success-hl);color:var(--color-success);border-color:var(--color-success)}
+.sc-val{min-width:44px;text-align:center;font-size:var(--tx-sm);font-weight:700;color:var(--color-text);font-variant-numeric:tabular-nums;background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:2px var(--sp2);transition:color var(--tr)}
+.sc-val.pos{color:var(--color-success)}
+.reset-btn{width:24px;height:24px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;color:var(--color-text-faint);opacity:0;transition:opacity var(--tr),background var(--tr),color var(--tr);flex-shrink:0}
+.p-row:hover .reset-btn{opacity:1}
+.reset-btn:hover{background:var(--color-error-hl);color:var(--color-error)}
+.del-btn{width:24px;height:24px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;color:var(--color-text-faint);opacity:0;transition:opacity var(--tr),background var(--tr),color var(--tr);flex-shrink:0}
+.p-row:hover .del-btn{opacity:1}
+.del-btn:hover{background:var(--color-error-hl);color:var(--color-error)}
+.row-actions{display:flex;align-items:center;gap:4px}
+
+/* ADD ROW */
+.add-row{display:flex;align-items:center;gap:var(--sp2);padding:var(--sp2) var(--sp3);border:1.5px dashed var(--color-border);border-radius:var(--radius-lg);color:var(--color-text-faint);cursor:pointer;font-size:var(--tx-xs);font-weight:500;transition:border-color var(--tr),color var(--tr),background var(--tr)}
+.add-row:hover{border-color:var(--color-primary);color:var(--color-primary);background:var(--color-primary-hl)}
+
+/* SCORE ANIMATION */
+@keyframes scorePop{0%{transform:scale(1)}50%{transform:scale(1.2)}100%{transform:scale(1)}}
+.score-pop{animation:scorePop .22s ease}
+
+/* DIVIDER */
+.divider{height:1px;background:var(--color-divider);margin:var(--sp5) 0}
+
+/* LEADERBOARD */
+.lb-section{margin-bottom:var(--sp8)}
+.hist-empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:var(--sp12) var(--sp8);color:var(--color-text-muted)}
+.hist-empty h3{color:var(--color-text);margin-bottom:var(--sp2);font-size:var(--tx-base)}
+.hist-day{margin-bottom:var(--sp6)}
+.hist-day-label{font-size:var(--tx-xs);font-weight:600;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:var(--sp2);display:flex;align-items:center;gap:var(--sp2)}
+.hist-day-dot{width:6px;height:6px;border-radius:50%;background:var(--color-primary);flex-shrink:0}
+.hist-list{display:flex;flex-direction:column;gap:var(--sp1)}
+.hist-row{display:flex;align-items:center;gap:var(--sp3);padding:var(--sp2) var(--sp3);background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);font-size:var(--tx-xs)}
+.hist-time{color:var(--color-text-faint);font-variant-numeric:tabular-nums;min-width:40px;flex-shrink:0}
+.hist-av{width:22px;height:22px;border-radius:var(--radius-full);overflow:hidden;background:var(--color-surface-offset);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--color-text-muted);flex-shrink:0;border:1px solid var(--color-border)}
+.hist-av img{width:100%;height:100%;object-fit:cover}
+.hist-name{color:var(--color-text);font-weight:500;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hist-delta{font-weight:700;font-variant-numeric:tabular-nums;color:var(--color-success);flex-shrink:0}
+.hist-session{color:var(--color-text-faint);flex-shrink:0}
+.lb-month-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp5)}
+.lb-month-label{font-size:var(--tx-sm);font-weight:600;color:var(--color-text)}
+.lb-title{font-size:var(--tx-sm);font-weight:700;color:var(--color-text);margin-bottom:var(--sp3);display:flex;align-items:center;gap:var(--sp2)}
+.lb-table{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);overflow:hidden}
+.lb-row{display:grid;grid-template-columns:36px 1fr auto auto;gap:var(--sp3);align-items:center;padding:var(--sp3) var(--sp4);border-bottom:1px solid var(--color-divider);transition:background var(--tr)}
+.lb-row:last-child{border-bottom:none}
+.lb-row:hover{background:var(--color-surface-offset)}
+.lb-hdr{background:var(--color-surface-offset);padding:var(--sp2) var(--sp4);font-size:var(--tx-xs);color:var(--color-text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.lb-hdr:hover{background:var(--color-surface-offset)}
+.lb-rank{font-size:var(--tx-sm);font-weight:700;text-align:center;font-variant-numeric:tabular-nums}
+.rank-gold{color:var(--color-gold)}
+.rank-silver{color:var(--color-silver)}
+.rank-bronze{color:var(--color-orange)}
+.lb-person{display:flex;align-items:center;gap:var(--sp2)}
+.lb-av{width:28px;height:28px;border-radius:var(--radius-full);overflow:hidden;background:var(--color-surface-offset);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--color-text-muted);flex-shrink:0;border:1px solid var(--color-border)}
+.lb-av img{width:100%;height:100%;object-fit:cover}
+.lb-name{font-size:var(--tx-sm);font-weight:500}
+.lb-type{font-size:var(--tx-xs);padding:2px var(--sp2);border-radius:var(--radius-full)}
+.lb-type.pr{background:var(--color-primary-hl);color:var(--color-primary)}
+.lb-type.rv{background:var(--color-gold-hl);color:var(--color-gold)}
+.lb-score{font-size:var(--tx-sm);font-weight:700;font-variant-numeric:tabular-nums;color:var(--color-primary);text-align:right;min-width:48px}
+.lb-bonus{font-size:var(--tx-xs);color:var(--color-gold);font-weight:600;text-align:right;min-width:48px}
+
+/* PODIUM TOP3 */
+.podium{display:flex;gap:var(--sp3);margin-bottom:var(--sp4)}
+.podium-card{flex:1;background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:var(--sp4);display:flex;flex-direction:column;align-items:center;gap:var(--sp2);text-align:center;transition:box-shadow var(--tr)}
+.podium-card:hover{box-shadow:var(--sh-md)}
+.podium-card.gold{border-color:var(--color-gold);background:color-mix(in oklab,var(--color-gold-hl) 40%,var(--color-surface))}
+.podium-card.silver{border-color:color-mix(in oklab,var(--color-silver) 40%,var(--color-border))}
+.podium-card.bronze{border-color:color-mix(in oklab,var(--color-orange) 40%,var(--color-border))}
+.podium-medal{font-size:22px;line-height:1}
+.podium-av{width:48px;height:48px;border-radius:var(--radius-full);overflow:hidden;background:var(--color-surface-offset);display:flex;align-items:center;justify-content:center;font-size:var(--tx-base);font-weight:700;color:var(--color-text-muted);border:2px solid var(--color-border)}
+.podium-av img{width:100%;height:100%;object-fit:cover}
+.podium-name{font-size:var(--tx-xs);font-weight:600;color:var(--color-text)}
+.podium-pts{font-size:var(--tx-sm);font-weight:700;color:var(--color-primary);font-variant-numeric:tabular-nums}
+.podium-bonus{font-size:10px;color:var(--color-gold);font-weight:600}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:oklch(0 0 0/.5);display:flex;align-items:center;justify-content:center;z-index:100;padding:var(--sp4);opacity:0;pointer-events:none;transition:opacity var(--tr)}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:var(--sp6);width:100%;max-width:360px;box-shadow:var(--sh-lg);transform:translateY(12px);transition:transform var(--tr)}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-title{font-size:var(--tx-base);font-weight:600;margin-bottom:var(--sp4)}
+.form-group{display:flex;flex-direction:column;gap:var(--sp1);margin-bottom:var(--sp4)}
+.form-label{font-size:var(--tx-xs);font-weight:500;color:var(--color-text-muted)}
+.form-input{padding:var(--sp2) var(--sp3);background:var(--color-surface-offset);border:1px solid var(--color-border);border-radius:var(--radius-md);font-size:var(--tx-sm);color:var(--color-text);outline:none;transition:border-color var(--tr),box-shadow var(--tr);width:100%}
+.form-input:focus{border-color:var(--color-primary);box-shadow:0 0 0 3px color-mix(in oklab,var(--color-primary) 15%,transparent)}
+.form-input::placeholder{color:var(--color-text-faint)}
+.modal-actions{display:flex;gap:var(--sp2);justify-content:flex-end;margin-top:var(--sp2)}
+
+/* TOAST */
+.toast-cnt{position:fixed;bottom:var(--sp6);right:var(--sp6);display:flex;flex-direction:column;gap:var(--sp2);z-index:200;pointer-events:none}
+.toast{background:var(--color-text);color:var(--color-text-inverse);padding:var(--sp2) var(--sp4);border-radius:var(--radius-lg);font-size:var(--tx-xs);font-weight:500;box-shadow:var(--sh-lg);animation:tUp .2s ease,tOut .3s ease 1.7s forwards}
+@keyframes tUp{from{transform:translateY(8px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes tOut{to{opacity:0;transform:translateY(-4px)}}
+
+/* EMPTY */
+.empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:var(--sp12) var(--sp8);color:var(--color-text-muted)}
+.empty h3{color:var(--color-text);margin-bottom:var(--sp2);font-size:var(--tx-base)}
+.empty p{max-width:34ch;font-size:var(--tx-sm);color:var(--color-text-muted)}
+
+@media(max-width:640px){
+  .header{padding:var(--sp3) var(--sp4)}
+  .main{padding:var(--sp4)}
+  .logo-text{display:none}
+  .podium{flex-direction:column}
+  .lb-row{grid-template-columns:28px 1fr auto}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-left">
+      <a class="logo" href="#">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-label="Дизайн Осмотр">
+          <rect width="28" height="28" rx="7" fill="currentColor" fill-opacity=".08"/>
+          <rect x="5" y="8" width="10" height="2" rx="1" fill="var(--color-primary)"/>
+          <rect x="5" y="13" width="7" height="2" rx="1" fill="var(--color-primary)" opacity=".7"/>
+          <rect x="5" y="18" width="5" height="2" rx="1" fill="var(--color-primary)" opacity=".4"/>
+          <circle cx="21" cy="13" r="5" stroke="var(--color-primary)" stroke-width="1.5" fill="none"/>
+          <path d="M19.5 13l1 1 2-2" stroke="var(--color-primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="logo-text">Дизайн Осмотр</span>
+      </a>
+    </div>
+    <div class="header-right">
+      <span id="syncDot" title="Данные сохранены" style="width:8px;height:8px;border-radius:50%;background:var(--color-text-faint);display:inline-block;flex-shrink:0;transition:background .3s"></span>
+      <button class="btn btn-ghost btn-icon" data-theme-toggle aria-label="Сменить тему">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="content">
+      <!-- TABS -->
+      <div class="tabs">
+        <div class="tabs-main">
+          <button class="tab active" onclick="switchTab('scoring')" id="tab-scoring">Баллы</button>
+          <button class="tab" onclick="switchTab('lb-month')" id="tab-lb-month">Месяц</button>
+          <button class="tab" onclick="switchTab('lb-all')" id="tab-lb-all">Всего</button>
+        </div>
+        <button class="tab" onclick="switchTab('history')" id="tab-history">История</button>
+      </div>
+
+      <!-- ═══ SCORING TAB ═══ -->
+      <div id="view-scoring">
+        <!-- CALENDAR STRIP -->
+        <div class="cal-section">
+          <div class="cal-header">
+            <span class="cal-month" id="calMonthLabel"></span>
+            <div class="cal-nav">
+              <button class="btn btn-ghost btn-icon" onclick="navMonth(-1)" aria-label="Предыдущий месяц">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+              </button>
+              <button class="btn btn-ghost btn-icon" onclick="navMonth(1)" aria-label="Следующий месяц">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+              </button>
+              <button class="btn btn-secondary" id="btnCalToday" onclick="goToday()">Сегодня</button>
+            </div>
+          </div>
+          <div class="cal-strip" id="calStrip"></div>
+        </div>
+
+        <!-- PRESENTERS -->
+        <div class="section-hd">
+          <div class="section-title">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 13h4"/></svg>
+            Показатели
+            <span class="cnt-badge" id="cntPresenter">0</span>
+          </div>
+          <span class="hint-text">+1 или +2 за показ макета</span>
+        </div>
+        <div class="p-list" id="listPresenters"></div>
+
+        <div class="divider"></div>
+
+        <!-- REVIEWERS -->
+        <div class="section-hd">
+          <div class="section-title">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Осмотрщики
+            <span class="cnt-badge" id="cntReviewer">0</span>
+          </div>
+          <span class="hint-text">+0.5 за комментарий голосом или текстом</span>
+        </div>
+        <div class="p-list" id="listReviewers"></div>
+      </div>
+
+      <!-- ═══ MONTH LEADERBOARD TAB ═══ -->
+      <div id="view-lb-month" style="display:none">
+        <div id="monthLbContent"></div>
+      </div>
+
+      <!-- ═══ HISTORY TAB ═══ -->
+      <div id="view-history" style="display:none">
+        <div id="historyContent"></div>
+      </div>
+
+      <!-- ═══ ALL TIME LEADERBOARD TAB ═══ -->
+      <div id="view-lb-all" style="display:none">
+        <div id="allLbContent"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ADD MODAL -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal" role="dialog" aria-modal="true">
+    <h2 class="modal-title">Добавить участника</h2>
+    <div class="form-group">
+      <label class="form-label" for="inpName">Имя и фамилия *</label>
+      <input class="form-input" type="text" id="inpName" placeholder="Аня Петрова" autocomplete="off">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Отмена</button>
+      <button class="btn btn-primary" onclick="confirmAdd()">Добавить</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-cnt" id="toastCnt"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// API CONFIG
+// ═══════════════════════════════════════════════════════════
+// Замени на URL своего задеплоенного бэкенда:
+// Railway: https://dizain-osmotr-backend.up.railway.app
+// Render:  https://dizain-osmotr-backend.onrender.com
+const API_URL = 'https://your-backend.railway.app';
+
+// ═══════════════════════════════════════════════════════════
+// DATA MODEL
+// ═══════════════════════════════════════════════════════════
+// participants: [{id, name, avatar, type:'presenter'|'reviewer'}]
+// sessions:     { 'YYYY-MM-DD': { pid: score, ... } }
+// bonuses:      { 'YYYY-MM': { pid: bonusPoints } }  ← from monthly top3
+
+let participants = [];
+let sessions = {};   // 'YYYY-MM-DD' -> {pid: score}
+let history  = [];   // [{ts, pid, delta, wkey, scoreBefore, scoreAfter}]
+let bonuses  = {};   // 'YYYY-MM' -> {pid: bonusPoints}
+let idCounter = 100;
+
+// Calendar state
+let calYear, calMonth, activeWeedKey;
+
+// Modal state
+let pendingAddType = null;
+
+// ═══════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════
+function uid(){ return 'id'+(++idCounter)+'_'+Date.now(); }
+function fmt(v){ return v===Math.floor(v)?String(v):v.toFixed(1); }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function initials(name){ return name.split(' ').filter(Boolean).map(w=>w[0]).slice(0,2).join('').toUpperCase(); }
+function toast(msg){ const c=document.getElementById('toastCnt'),t=document.createElement('div');t.className='toast';t.textContent=msg;c.appendChild(t);setTimeout(()=>t.remove(),2100); }
+function pad(n){ return String(n).padStart(2,'0'); }
+function dateKey(y,m,d){ return `${y}-${pad(m)}-${pad(d)}`; }
+function monthKey(y,m){ return `${y}-${pad(m)}`; }
+
+// Get all Wednesdays for a given year+month
+function getWednesdays(year, month){
+  const days=[];
+  const d=new Date(year,month-1,1);
+  while(d.getDay()!==3) d.setDate(d.getDate()+1);
+  while(d.getMonth()===month-1){
+    days.push(new Date(d));
+    d.setDate(d.getDate()+7);
+  }
+  return days;
+}
+
+function formatWeekDate(dt){
+  return dt.toLocaleDateString('ru-RU',{day:'numeric',month:'short'});
+}
+
+// Get score for a participant in a session
+function getScore(pid, wkey){ return (sessions[wkey]||{})[pid]||0; }
+function setScore(pid, wkey, val){ if(!sessions[wkey]) sessions[wkey]={}; sessions[wkey][pid]=Math.max(0,val); }
+
+// Aggregate scores for a participant in a month
+function monthScore(pid, year, month){
+  const weddays = getWednesdays(year, month);
+  let total=0;
+  weddays.forEach(d=>{ total+=getScore(pid, dateKey(d.getFullYear(),d.getMonth()+1,d.getDate())); });
+  // add bonus
+  const mk=monthKey(year,month);
+  total+=(bonuses[mk]||{})[pid]||0;
+  return total;
+}
+
+// Aggregate ALL-TIME score for a participant
+function allTimeScore(pid){
+  let total=0;
+  Object.values(sessions).forEach(sess=>{ total+=sess[pid]||0; });
+  // add all bonuses
+  Object.values(bonuses).forEach(b=>{ total+=b[pid]||0; });
+  return total;
+}
+
+// ═══════════════════════════════════════════════════════════
+// SYNC (загрузка и сохранение на сервер)
+// ═══════════════════════════════════════════════════════════
+let _saveTimer = null;
+
+function setSyncStatus(s){
+  const dot = document.getElementById('syncDot');
+  if(!dot) return;
+  const map = {
+    idle:   {bg:'var(--color-success)', title:'Данные сохранены'},
+    saving: {bg:'var(--color-gold)',    title:'Сохранение...'},
+    error:  {bg:'var(--color-error)',   title:'Ошибка синхронизации'}
+  };
+  const st = map[s] || map.idle;
+  dot.style.background = st.bg;
+  dot.title = st.title;
+}
+
+function scheduleSync(){
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(saveData, 800);
+}
+
+async function loadData(){
+  setSyncStatus('saving');
+  try {
+    const res = await fetch(API_URL+'/api/data');
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const d = await res.json();
+    if(Array.isArray(d.participants)) participants = d.participants;
+    if(d.sessions && typeof d.sessions==='object') sessions = d.sessions;
+    if(Array.isArray(d.history)) history = d.history;
+    if(d.bonuses && typeof d.bonuses==='object') bonuses = d.bonuses;
+    // синхронизируем idCounter чтобы не было коллизий ID
+    participants.forEach(p=>{
+      const n=parseInt((p.id||'').replace(/\D/g,''));
+      if(!isNaN(n)&&n>idCounter) idCounter=n;
+    });
+    setSyncStatus('idle');
+  } catch(e){
+    console.error('loadData:', e);
+    setSyncStatus('error');
+    toast('Не удалось загрузить данные с сервера');
+  }
+}
+
+async function saveData(){
+  setSyncStatus('saving');
+  try {
+    const res = await fetch(API_URL+'/api/data',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({participants,sessions,history,bonuses})
+    });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    setSyncStatus('idle');
+  } catch(e){
+    console.error('saveData:', e);
+    setSyncStatus('error');
+    toast('Ошибка сохранения. Проверь подключение.');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// CALENDAR
+// ═══════════════════════════════════════════════════════════
+function initCal(){
+  const now=new Date();
+  calYear=now.getFullYear();
+  calMonth=now.getMonth()+1;
+  // default active = nearest Wednesday
+  const wed=getWednesdays(calYear,calMonth);
+  if(wed.length>0){
+    // pick nearest past or today
+    const today=new Date(); today.setHours(0,0,0,0);
+    let chosen=wed[0];
+    for(const w of wed){ if(w<=today) chosen=w; }
+    activeWeedKey=dateKey(chosen.getFullYear(),chosen.getMonth()+1,chosen.getDate());
+  }
+  renderCal();
+}
+
+function navMonth(dir){
+  calMonth+=dir;
+  if(calMonth>12){calMonth=1;calYear++;}
+  if(calMonth<1){calMonth=12;calYear--;}
+  renderCal();
+}
+function goToday(){
+  const now=new Date();
+  calYear=now.getFullYear();
+  calMonth=now.getMonth()+1;
+  // re-select nearest wednesday
+  const wed=getWednesdays(calYear,calMonth);
+  const today=new Date(); today.setHours(0,0,0,0);
+  let chosen=wed[0];
+  for(const w of wed){ if(w<=today) chosen=w; }
+  activeWeedKey=dateKey(chosen.getFullYear(),chosen.getMonth()+1,chosen.getDate());
+  renderCal();
+}
+
+function renderCal(){
+  const months=['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+  document.getElementById('calMonthLabel').textContent=`${months[calMonth-1]} ${calYear}`;
+  const strip=document.getElementById('calStrip');
+  strip.innerHTML='';
+  const weddays=getWednesdays(calYear,calMonth);
+  weddays.forEach(dt=>{
+    const wk=dateKey(dt.getFullYear(),dt.getMonth()+1,dt.getDate());
+    const hasData=sessions[wk]&&Object.values(sessions[wk]).some(v=>v>0);
+    const pill=document.createElement('div');
+    pill.className='week-pill'+(activeWeedKey===wk?' active':'');
+    pill.innerHTML=`<span class="week-date">${formatWeekDate(dt)}</span><span class="week-dot${hasData?'':' hidden'}"></span>`;
+    pill.onclick=()=>{ activeWeedKey=wk; renderCal(); renderScoring(); };
+    strip.appendChild(pill);
+  });
+  renderScoring();
+
+}
+
+// ═══════════════════════════════════════════════════════════
+// SCORING RENDER
+// ═══════════════════════════════════════════════════════════
+function renderScoring(){
+  const presenters=participants.filter(p=>p.type==='presenter');
+  const reviewers =participants.filter(p=>p.type==='reviewer');
+  document.getElementById('cntPresenter').textContent=presenters.length;
+  document.getElementById('cntReviewer').textContent=reviewers.length;
+  renderList('listPresenters',presenters,'presenter');
+  renderList('listReviewers', reviewers, 'reviewer');
+}
+
+function renderList(listId, people, type){
+  const list=document.getElementById(listId);
+  list.innerHTML='';
+  people.forEach(p=>{
+    const score=getScore(p.id,activeWeedKey);
+    const row=document.createElement('div');
+    row.className=`p-row ${type}-row`;
+    row.id='row-'+p.id;
+
+    const av=p.avatar?`<img src="${p.avatar}" alt="${esc(p.name)}" loading="lazy">`:`<span>${esc(initials(p.name))}</span>`;
+
+    let btns='';
+    if(type==='presenter'){
+      btns=`<div class="score-btns">
+        <button class="sc-btn plus" onclick="adj('${p.id}',1)" title="+1">+1</button>
+        <button class="sc-btn plus" onclick="adj('${p.id}',2)" title="+2">+2</button>
+      </div>`;
+    } else {
+      btns=`<div class="score-btns">
+        <button class="sc-btn plus" onclick="adj('${p.id}',0.5)" title="+0.5">+½</button>
+      </div>`;
+    }
+
+    row.innerHTML=`
+      <div class="avatar-wrap" onclick="triggerAvatar('${p.id}')" title="Загрузить фото">
+        <div class="avatar">${av}</div>
+        <div class="avatar-hint"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+        <input type="file" accept="image/png,image/jpeg,image/jpg,image/webp" class="avatar-file" id="avf-${p.id}" onchange="handleAvatar(event,'${p.id}')">
+      </div>
+      <div class="name-edit-wrap">
+        <span class="p-name" id="pname-${p.id}" ondblclick="startEditName('${p.id}')" title="Двойной клик — редактировать">${esc(p.name)}</span>
+        <input class="name-input" id="pinput-${p.id}" type="text" value="${esc(p.name)}" onblur="finishEditName('${p.id}')" onkeydown="nameKey(event,'${p.id}')">
+      </div>
+      <div class="score-ctrl">
+        ${btns}
+        <span class="sc-val${score>0?' pos':''}" id="sv-${p.id}">${fmt(score)}</span>
+        <div class="row-actions">
+          <button class="reset-btn" onclick="resetOne('${p.id}')" title="Сброс баллов за эту сессию" aria-label="Сбросить">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          </button>
+          <button class="del-btn" onclick="delParticipant('${p.id}')" title="Удалить участника" aria-label="Удалить">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18M19 6l-1 14H6L5 6M10 11v6M14 11v6M8 6V4h8v2"/></svg>
+          </button>
+        </div>
+      </div>
+    `;
+    list.appendChild(row);
+  });
+
+  // Add button
+  const addEl=document.createElement('div');
+  addEl.className='add-row';
+  addEl.setAttribute('role','button');
+  addEl.setAttribute('tabindex','0');
+  addEl.innerHTML=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg> Добавить участника`;
+  addEl.onclick=()=>openModal(type);
+  addEl.onkeydown=(e)=>{ if(e.key==='Enter') openModal(type); };
+  list.appendChild(addEl);
+}
+
+// ═══════════════════════════════════════════════════════════
+// SCORE ACTIONS
+// ═══════════════════════════════════════════════════════════
+function adj(pid, delta){
+  if(!activeWeedKey){ toast('Выберите сессию в календаре'); return; }
+  const cur=getScore(pid,activeWeedKey);
+  const nv=parseFloat((cur+delta).toFixed(2));
+  if(nv===cur) return;
+  setScore(pid,activeWeedKey,nv);
+  history.unshift({ts:Date.now(),pid,delta,wkey:activeWeedKey,scoreBefore:cur,scoreAfter:nv});
+  const el=document.getElementById('sv-'+pid);
+  if(el){
+    el.textContent=fmt(nv);
+    el.className='sc-val'+(nv>0?' pos':'');
+    el.classList.add('score-pop');
+    setTimeout(()=>el.classList.remove('score-pop'),240);
+  }
+  renderCal();
+  scheduleSync();
+}
+
+function resetOne(pid){
+  if(!activeWeedKey) return;
+  setScore(pid,activeWeedKey,0);
+  const el=document.getElementById('sv-'+pid);
+  if(el){ el.textContent='0'; el.className='sc-val'; }
+  renderCal();
+  scheduleSync();
+}
+
+// ═══════════════════════════════════════════════════════════
+// AVATAR
+// ═══════════════════════════════════════════════════════════
+function triggerAvatar(pid){ const i=document.getElementById('avf-'+pid); if(i) i.click(); }
+function handleAvatar(e,pid){
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const p=participants.find(x=>x.id===pid);
+    if(p){ p.avatar=ev.target.result; renderScoring(); toast('Фото обновлено'); scheduleSync(); }
+  };
+  reader.readAsDataURL(file);
+}
+
+// ═══════════════════════════════════════════════════════════
+// NAME EDIT
+// ═══════════════════════════════════════════════════════════
+function startEditName(pid){
+  document.getElementById('pname-'+pid).style.display='none';
+  const inp=document.getElementById('pinput-'+pid);
+  inp.style.display='block';
+  inp.focus();
+  inp.select();
+}
+function finishEditName(pid){
+  const inp=document.getElementById('pinput-'+pid);
+  const val=inp.value.trim();
+  if(val){
+    const p=participants.find(x=>x.id===pid);
+    if(p){ p.name=val; scheduleSync(); }
+    const nameEl=document.getElementById('pname-'+pid);
+    if(nameEl) nameEl.textContent=val;
+  }
+  inp.style.display='none';
+  const nameEl=document.getElementById('pname-'+pid);
+  if(nameEl) nameEl.style.display='';
+}
+function nameKey(e,pid){ if(e.key==='Enter'||e.key==='Escape') finishEditName(pid); }
+
+// ═══════════════════════════════════════════════════════════
+// DELETE PARTICIPANT
+// ═══════════════════════════════════════════════════════════
+function delParticipant(pid){
+  if(!confirm('Удалить участника? Его баллы тоже будут удалены.')) return;
+  participants=participants.filter(p=>p.id!==pid);
+  Object.keys(sessions).forEach(k=>{ delete sessions[k][pid]; });
+  renderScoring();
+  renderCal();
+  scheduleSync();
+}
+
+// ═══════════════════════════════════════════════════════════
+// ADD MODAL
+// ═══════════════════════════════════════════════════════════
+function openModal(type){
+  pendingAddType=type;
+  document.getElementById('inpName').value='';
+  document.getElementById('inpName').style.borderColor='';
+  document.getElementById('addModal').classList.add('open');
+  setTimeout(()=>document.getElementById('inpName').focus(),100);
+}
+function closeModal(){
+  document.getElementById('addModal').classList.remove('open');
+  pendingAddType=null;
+}
+function confirmAdd(){
+  const name=document.getElementById('inpName').value.trim();
+  if(!name){ document.getElementById('inpName').style.borderColor='var(--color-error)'; return; }
+  participants.push({id:uid(),name,avatar:null,type:pendingAddType});
+  closeModal();
+  renderScoring();
+  toast(`${name} добавлен`);
+  scheduleSync();
+}
+document.addEventListener('keydown',e=>{
+  if(!document.getElementById('addModal').classList.contains('open')) return;
+  if(e.key==='Enter') confirmAdd();
+  if(e.key==='Escape') closeModal();
+});
+document.getElementById('addModal').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeModal(); });
+
+// ═══════════════════════════════════════════════════════════
+// LEADERBOARD HELPERS
+// ═══════════════════════════════════════════════════════════
+const BONUS_MAP={1:50,2:30,3:20};
+
+function buildPodium(sorted){
+  const top=sorted.slice(0,3);
+  if(top.length===0) return '';
+  const medals=['🥇','🥈','🥉'];
+  const classes=['gold','silver','bronze'];
+  let html='<div class="podium">';
+  top.forEach((item,i)=>{
+    const p=participants.find(x=>x.id===item.pid);
+    if(!p) return;
+    const av=p.avatar?`<img src="${p.avatar}" alt="${esc(p.name)}">`:`<span>${esc(initials(p.name))}</span>`;
+    const bonus=BONUS_MAP[i+1]||0;
+    html+=`<div class="podium-card ${classes[i]}">
+      <div class="podium-medal">${medals[i]}</div>
+      <div class="podium-av">${av}</div>
+      <div class="podium-name">${esc(p.name)}</div>
+      <div class="podium-pts">${fmt(item.score)} б</div>
+      ${bonus?`<div class="podium-bonus">+${bonus} бонус</div>`:''}
+    </div>`;
+  });
+  html+='</div>';
+  return html;
+}
+
+function buildTable(sorted, showBonus){
+  if(sorted.length===0) return `<div class="empty"><h3>Нет данных</h3><p>Начислите баллы в сессиях</p></div>`;
+  let html=`<div class="lb-table">
+    <div class="lb-row lb-hdr">
+      <div>#</div><div>Участник</div><div></div><div style="text-align:right">${showBonus?'Баллы':'Баллы'}</div>
+    </div>`;
+  sorted.forEach((item,i)=>{
+    const p=participants.find(x=>x.id===item.pid);
+    if(!p) return;
+    const rank=i+1;
+    const rankHtml=rank===1?`<span class="rank-gold">🥇</span>`:rank===2?`<span class="rank-silver">🥈</span>`:rank===3?`<span class="rank-bronze">🥉</span>`:`<span style="color:var(--color-text-muted)">${rank}</span>`;
+    const av=p.avatar?`<img src="${p.avatar}" alt="${esc(p.name)}">`:`<span>${esc(initials(p.name))}</span>`;
+    const typeLabel=p.type==='presenter'?'Показатель':'Осмотрщик';
+    const typeClass=p.type==='presenter'?'pr':'rv';
+    const bonus=BONUS_MAP[rank]||0;
+    html+=`<div class="lb-row">
+      <div class="lb-rank">${rankHtml}</div>
+      <div class="lb-person"><div class="lb-av">${av}</div><span class="lb-name">${esc(p.name)}</span></div>
+      <span class="lb-type ${typeClass}">${typeLabel}</span>
+      <div class="lb-score">${fmt(item.score)}${showBonus&&bonus?` <span style="font-size:10px;color:var(--color-gold)">+${bonus}</span>`:''}</div>
+    </div>`;
+  });
+  html+='</div>';
+  return html;
+}
+
+// ═══════════════════════════════════════════════════════════
+// MONTH LEADERBOARD
+// ═══════════════════════════════════════════════════════════
+// Month LB state
+let lbYear, lbMonth;
+
+function initMonthLb(){
+  const now=new Date();
+  lbYear=now.getFullYear();
+  lbMonth=now.getMonth()+1;
+  renderMonthLb();
+}
+
+function navLbMonth(dir){
+  lbMonth+=dir;
+  if(lbMonth>12){lbMonth=1;lbYear++;}
+  if(lbMonth<1){lbMonth=12;lbYear--;}
+  renderMonthLb();
+}
+function goCurrentMonth(){
+  const now=new Date();
+  lbYear=now.getFullYear();
+  lbMonth=now.getMonth()+1;
+  renderMonthLb();
+}
+
+function renderMonthLb(){
+  const y=lbYear, m=lbMonth;
+  const months=['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+
+  function monthScored(type){
+    return participants.filter(p=>p.type===type).map(p=>{
+      const weddays=getWednesdays(y,m);
+      let s=0;
+      weddays.forEach(d=>{ s+=getScore(p.id,dateKey(d.getFullYear(),d.getMonth()+1,d.getDate())); });
+      return {pid:p.id,score:s};
+    }).sort((a,b)=>b.score-a.score);
+  }
+
+  const scoredPr=monthScored('presenter');
+  const scoredRv=monthScored('reviewer');
+
+  const now2=new Date(); const isCurrent=(y===now2.getFullYear()&&m===now2.getMonth()+1);
+  const nav=`<div class="lb-month-nav">
+    <button class="btn btn-ghost btn-icon" onclick="navLbMonth(-1)" aria-label="Предыдущий месяц">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <span class="lb-month-label">${months[m-1]} ${y}</span>
+    <button class="btn btn-ghost btn-icon" onclick="navLbMonth(1)" aria-label="Следующий месяц">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+    <button class="btn btn-secondary" style="margin-left:var(--sp2)" onclick="goCurrentMonth()">Сегодня</button>
+  </div>`;
+
+  let html=`${nav}
+    <div class="lb-section">
+      <div class="lb-title">Показатели</div>
+      ${buildPodium(scoredPr)}
+      ${buildTable(scoredPr, true)}
+    </div>
+    <div class="lb-section">
+      <div class="lb-title">Осмотрщики</div>
+      ${buildPodium(scoredRv)}
+      ${buildTable(scoredRv, true)}
+    </div>`;
+
+  document.getElementById('monthLbContent').innerHTML=html;
+}
+
+// ═══════════════════════════════════════════════════════════
+// ALL TIME LEADERBOARD
+// ═══════════════════════════════════════════════════════════
+function renderAllLb(){
+  const trophyIcon=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>`;
+
+  const scoredPr=participants.filter(p=>p.type==='presenter')
+    .map(p=>({pid:p.id,score:allTimeScore(p.id)})).sort((a,b)=>b.score-a.score);
+  const scoredRv=participants.filter(p=>p.type==='reviewer')
+    .map(p=>({pid:p.id,score:allTimeScore(p.id)})).sort((a,b)=>b.score-a.score);
+
+  let html=`
+    <div class="lb-section">
+      <div class="lb-title">${trophyIcon} Всего — Показатели</div>
+      ${buildPodium(scoredPr)}
+      ${buildTable(scoredPr, false)}
+    </div>
+    <div class="lb-section">
+      <div class="lb-title">${trophyIcon} Всего — Осмотрщики</div>
+      ${buildPodium(scoredRv)}
+      ${buildTable(scoredRv, false)}
+    </div>`;
+
+  document.getElementById('allLbContent').innerHTML=html;
+}
+
+// ═══════════════════════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════════════════════
+function renderHistory(){
+  const cont=document.getElementById('historyContent');
+  if(history.length===0){
+    cont.innerHTML=`<div class="hist-empty"><h3>История пуста</h3><p>Начислите баллы участникам — все изменения появятся здесь</p></div>`;
+    return;
+  }
+
+  // group by date
+  const groups={};
+  history.forEach(e=>{
+    const d=new Date(e.ts);
+    const key=dateKey(d.getFullYear(),d.getMonth()+1,d.getDate());
+    if(!groups[key]) groups[key]=[];
+    groups[key].push(e);
+  });
+
+  const months=['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+  let html='';
+  Object.keys(groups).sort((a,b)=>b.localeCompare(a)).forEach(dkey=>{
+    const entries=groups[dkey];
+    const d=new Date(dkey+'T00:00:00');
+    const label=`${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+    html+=`<div class="hist-day"><div class="hist-day-label"><span class="hist-day-dot"></span>${label}</div><div class="hist-list">`;
+    entries.forEach(e=>{
+      const p=participants.find(x=>x.id===e.pid);
+      if(!p) return;
+      const t=new Date(e.ts);
+      const hh=String(t.getHours()).padStart(2,'0');
+      const mm=String(t.getMinutes()).padStart(2,'0');
+      const av=p.avatar?`<img src="${p.avatar}" alt="${esc(p.name)}">`:`<span>${esc(initials(p.name))}</span>`;
+      const wdate=e.wkey; // YYYY-MM-DD
+      const [wy,wm,wd]=wdate.split('-');
+      const wlabel=`${parseInt(wd)} ${months[parseInt(wm)-1]}`;
+      html+=`<div class="hist-row">
+        <span class="hist-time">${hh}:${mm}</span>
+        <div class="hist-av">${av}</div>
+        <span class="hist-name">${esc(p.name)}</span>
+        <span class="hist-delta">+${fmt(e.delta)} б</span>
+        <span class="hist-session">сессия ${wlabel}</span>
+      </div>`;
+    });
+    html+='</div></div>';
+  });
+  cont.innerHTML=html;
+}
+
+function switchTab(tab){
+  ['scoring','lb-month','lb-all','history'].forEach(t=>{
+    document.getElementById('view-'+t).style.display=t===tab?'':'none';
+    document.getElementById('tab-'+t).classList.toggle('active',t===tab);
+  });
+  if(tab==='lb-month'){ if(!lbYear) initMonthLb(); else renderMonthLb(); }
+  if(tab==='lb-all')   renderAllLb();
+  if(tab==='history')  renderHistory();
+}
+
+// ═══════════════════════════════════════════════════════════
+// THEME TOGGLE
+// ═══════════════════════════════════════════════════════════
+(function(){
+  const t=document.querySelector('[data-theme-toggle]');
+  const r=document.documentElement;
+  let d=r.getAttribute('data-theme')||( matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');
+  r.setAttribute('data-theme',d);
+  function upd(){ if(!t) return; t.innerHTML=d==='dark'?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>':'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>'; }
+  upd();
+  t&&t.addEventListener('click',()=>{ d=d==='dark'?'light':'dark'; r.setAttribute('data-theme',d); upd(); });
+})();
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+(async function init(){
+  await loadData();
+  initCal();
+})();
+</script>
+</body>
+</html>
